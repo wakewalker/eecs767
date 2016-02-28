@@ -7,11 +7,15 @@
     action: apt name={{item}} state=present
     with_items:
       - git
+      - nginx
       - python-pip
       - python-virtualenv
 
   - name: Create virtualenv for web app.
-    pip: requirements=/vagrant/etc/requirements.txt virtualenv=/srv/venvs/webapp
+    pip: requirements=/vagrant/etc/searcher/requirements.txt virtualenv=/srv/venvs/searcher
 
-  - name: Start hello world Flask app.
-    shell: bash /vagrant/src/run.sh
+  - name: Place gunicorn/searcher Upstart script.
+    command: cp /vagrant/etc/init/gunicorn.conf /etc/init/
+
+  - name: Start gunicorn/search app server.
+    service: name=gunicorn state=started

@@ -5,7 +5,7 @@ class PostingList():
     def __init__(self, head=None):
         self.head = head
 
-    def insert(self, doc_id, doc_freq): 
+    def append(self, doc_id, doc_freq): 
         posting = Posting(doc_id, doc_freq, self.head)
         self.head = posting
 

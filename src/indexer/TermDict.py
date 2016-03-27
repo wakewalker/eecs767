@@ -8,7 +8,7 @@ class TermNode():
         self.tf = tf
         self.df = df
         self.idf = idf
-        self.plist = {}
+        self.plist = []
 
 
 class TermDict(dict):
@@ -18,7 +18,7 @@ class TermDict(dict):
             tnode = self[term]
         else:
             tnode = TermNode(term)
-        tnode.plist[did] = tf
+        tnode.plist.append({'did':did,'tf':int(tf)})
         tnode.tf += int(tf)
         tnode.df += 1
         self[term] = tnode
@@ -42,6 +42,8 @@ class TermDict(dict):
             tnode = self[term]
             tnode.idf = log10(dnum / tnode.df)
             self[term] = tnode
+            for p in tnode.plist:
+                p['w'] = tnode.idf * p['tf']
         
         
 

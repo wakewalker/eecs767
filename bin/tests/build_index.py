@@ -1,4 +1,4 @@
-from InvertedIndex import InvertedIndex
+from indexer import InvertedIndex
 import csv
 from sys import exit
 

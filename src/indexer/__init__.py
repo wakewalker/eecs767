@@ -1,0 +1,1 @@
+from InvertedIndex import InvertedIndex

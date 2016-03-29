@@ -17,7 +17,7 @@ class InvertedIndex(dict):
     def __init__(self, tdict_path='/home/ubuntu/eecs767/var/term.dct'):
         self.tdict_path = tdict_path
         # TODO: Get dictionary filepath from config
-        super(TermDict, self).__init__()
+        super(InvertedIndex, self).__init__()
 
     def add_term_data(self, term, did, tf):
         if term in self:

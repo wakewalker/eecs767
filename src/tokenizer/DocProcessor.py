@@ -1,13 +1,19 @@
 from urllib2 import urlopen
 from urlparse import urlparse
-from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup, Tag
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup, Tag, Comment
 import sys
 
 class DocProcessor():
 
     blacklist = [u'script']
-    stoplist = ["'", '"','-', ':', '.', ',', ':', ';', '(', ')', '[', ']', 'a', 'an', 'of', 'in', 'is', 'on', 'to', 'at', 'the']
-   
+    stopchars = ["'", '"','-', ':', '.', ',', ':', ';', '(', ')', '[', ']']
+    stopwords = ['a', 'an', 'of', 'in', 'is', 'on', 'to', 'at', 'the']
+
+
+    def __init__(self):
+        self.stoplist = self.stopwords + self.stopchars
+
+
     def parse(self, doc_src):
         self.doc_src = doc_src
         if self.is_url(doc_src):
@@ -41,9 +47,33 @@ class DocProcessor():
             if node.name not in self.blacklist:
                 for child in node.contents:
                     tokens.extend(self.find_tokens(child))
-        else:
+        elif not isinstance(node, Comment):
             tokens = [token.strip() for token in node.string.split()]
         return tokens
 
     def normalize_tokens(self):
-        self.tokens = [ token.lower() for token in self.tokens if token not in self.stoplist]
+        self.tokens = [self.normalize(token) for token in self.tokens if token not in self.stoplist]
+
+
+    def normalize(self, token):
+        token = token.lower()
+        token = self.char_strip(token)
+        return token
+
+    
+    def char_strip(self, otoken):
+        '''Strip leading and trailing stopchars recusively'''
+        print otoken
+        token = otoken
+
+        if len(token) > 0 and token[0] in self.stopchars:
+            token = token[1:]
+        if len(token) > 0 and token[-1] in self.stopchars:
+            token = token[:-1]
+        
+        if token == '':
+            return None
+        elif token == otoken:
+            return token
+        else:
+            return self.char_strip(token)

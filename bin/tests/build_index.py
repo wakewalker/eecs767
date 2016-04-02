@@ -2,7 +2,7 @@ from indexer import InvertedIndex
 import csv
 from sys import exit
 
-with open('../../var/sample.csv') as f:
+with open('/home/ubuntu/eecs767/var/sample.csv') as f:
     term_list = []
     for row in csv.DictReader(f, skipinitialspace=True):
         term_list.append(row)

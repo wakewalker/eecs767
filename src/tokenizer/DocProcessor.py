@@ -3,10 +3,10 @@ from urlparse import urlparse
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup, Tag
 import sys
 
-class DocParser():
+class DocProcessor():
 
     blacklist = [u'script']
-    stoplist = [':', '.', ':', ';', '(', ')', '[', ']']
+    stoplist = ["'", '"','-', ':', '.', ',', ':', ';', '(', ')', '[', ']', 'a', 'an', 'of', 'in', 'is', 'on', 'to', 'at', 'the']
    
     def parse(self, doc_src):
         self.doc_src = doc_src
@@ -42,7 +42,7 @@ class DocParser():
                 for child in node.contents:
                     tokens.extend(self.find_tokens(child))
         else:
-            tokens = node.string.split()
+            tokens = [token.strip() for token in node.string.split()]
         return tokens
 
     def normalize_tokens(self):

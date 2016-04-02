@@ -1,6 +1,6 @@
-from tokenizer import DocParser
+from tokenizer import DocProcessor
 
-dparser = DocParser()
-dparser.parse('/home/ubuntu/eecs767/var/docsnew/Zion_National_Park.htm')
-for token in dparser.tokens:
+dprocessor = DocProcessor()
+dprocessor.parse('/home/ubuntu/eecs767/var/docsnew/Zion_National_Park.htm')
+for token in dprocessor.tokens:
     print token

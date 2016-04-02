@@ -1,1 +1,1 @@
-from DocParser import DocParser
+from DocProcessor import DocProcessor

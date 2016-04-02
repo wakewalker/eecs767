@@ -1,1 +1,1 @@
-from InvertedIndex import InvertedIndex
+from InvertedIndex import InvertedIndex, TermNode

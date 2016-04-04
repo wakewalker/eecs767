@@ -6,8 +6,9 @@ import sys
 class DocProcessor():
 
     blacklist = [u'script']
-    stopchars = ["'", '"','-', ':', '.', ',', ':', ';', '(', ')', '[', ']']
     stopwords = ['a', 'an', 'of', 'in', 'is', 'on', 'to', 'at', 'the']
+    stopchars = ['~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '{', '[', '}', ']', '|', '\\', ':', ';', '"', '\'', '<', ',', '>', '.', '?', '/', u'\ufffd', u'\u2265', u'\u2014', u'\u2022', u'\u00ae', u'\ufeff']
+    splitchars = ['-', '/']
 
 
     def __init__(self):
@@ -23,6 +24,7 @@ class DocProcessor():
                 html = local_file.read()
 
         self.extract_tokens(html)
+#        self.split_tokens()
         self.normalize_tokens()
 
 
@@ -51,8 +53,16 @@ class DocProcessor():
             tokens = [token.strip() for token in node.string.split()]
         return tokens
 
+
+#    def split_tokens(self):
+        # Use list[i:i] = ['a', 'b', 'c']
+#        for i, token in enumerate(self.tokens):
+#            if 
+
+
     def normalize_tokens(self):
         self.tokens = [self.normalize(token) for token in self.tokens if token not in self.stoplist]
+        self.tokens = [token for token in self.tokens if token is not None]
 
 
     def normalize(self, token):
@@ -63,9 +73,7 @@ class DocProcessor():
     
     def char_strip(self, otoken):
         '''Strip leading and trailing stopchars recusively'''
-        print otoken
         token = otoken
-
         if len(token) > 0 and token[0] in self.stopchars:
             token = token[1:]
         if len(token) > 0 and token[-1] in self.stopchars:
@@ -77,3 +85,21 @@ class DocProcessor():
             return token
         else:
             return self.char_strip(token)
+
+
+    def gen_posting_list(self):
+        pdict = {}
+        for token in self.tokens:
+            if token in pdict:
+                pdict[token] += 1
+            else:
+                pdict[token] = 1
+
+        plist = []
+        for term in sorted(pdict):
+            plist.append([term,pdict[term]])
+
+        return plist
+
+
+

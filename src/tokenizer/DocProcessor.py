@@ -97,7 +97,10 @@ class DocProcessor():
 
         plist = []
         for term in sorted(pdict):
-            plist.append([term,pdict[term]])
+            plist.append({
+                'term': term,
+                'tfreq': pdict[term]
+            })
 
         return plist
 

@@ -1,8 +1,9 @@
 from __future__ import division
 from math import log10
-from linecache import getline
+import linecache
 
 from indexer.TermNode import TermNode
+
 
 class InvertedIndex(dict):
 
@@ -18,7 +19,7 @@ class InvertedIndex(dict):
                 term = unicode(parts[0], 'utf-8')
                 self[term] = {'loc':line_num, 'tnode':None}
                 line_num += 1
-        tdict_file.close()
+        #tdict_file.close()
 
     def add_term_data(self, term, did, tf):
         '''Add term data to the index for the given term.'''
@@ -112,6 +113,7 @@ class InvertedIndex(dict):
                 tdict_file.write('%s\n' % self[term]['tnode'].serialize())
                 self[term]['loc'] = line_num
                 line_num += 1
+        linecache.clearcache()
         
     def write(self):
         '''DEPRICATED: Use write_to_file instead.'''
@@ -132,7 +134,7 @@ class InvertedIndex(dict):
                 term = parts[0]
                 self[term] = {'loc':line_num, 'tnode':None}
                 line_num += 1
-        tdict_file.close()
+        #tdict_file.close()
 
 
     def get_term_data(self, term):
@@ -145,11 +147,10 @@ class InvertedIndex(dict):
         if 'loc' not in self[term]:
             return False
 
-        tdata = getline(
+        tdata = linecache.getline(
             self.tdict_path,
             self[term]['loc']
         ).rstrip()
-        print tdata
         segments = tdata.split('|')
         term = segments[0]
         tnode = TermNode(term)

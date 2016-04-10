@@ -18,6 +18,5 @@ for did, doc in docs.iteritems():
     plist = dproc.gen_posting_list()
     
     iidx.append(plist, did)
-#    iidx.calc_scores()
     iidx.update()
-#    iidx.clear()
+    iidx.clear()

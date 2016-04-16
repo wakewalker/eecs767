@@ -1,11 +1,14 @@
 from __future__ import division
 from math import log10
 import linecache
+import numpy
 
 from indexer.TermNode import TermNode
 
 
 class InvertedIndex(dict):
+
+    dnum = 5
 
     def __init__(self, tdict_path='/home/ubuntu/eecs767/var/term.dct'):
         '''Initialize the index from the given term file.'''
@@ -19,7 +22,7 @@ class InvertedIndex(dict):
                 term = unicode(parts[0], 'utf-8')
                 self[term] = {'loc':line_num, 'tnode':None}
                 line_num += 1
-        #tdict_file.close()
+
 
     def add_term_data(self, term, did, tf):
         '''Add term data to the index for the given term.'''
@@ -34,6 +37,7 @@ class InvertedIndex(dict):
             self[term]['tnode'] = tnode
         else:
             self[term] = {'loc':None, 'tnode':tnode}
+
 
     def append(self, tlist, did):
         '''Append term data to the inverted index for the given document.'''
@@ -51,11 +55,14 @@ class InvertedIndex(dict):
                 tdata['tfreq']
             )
 
+
     def calc_scores(self):
         '''Calculate idf and weight(w)'''
         for term in self:
+            if self[term]['tnode'] is None:
+                self.get_term_data(term)
             tnode = self[term]['tnode']
-            tnode.idf = log10(dnum / tnode.df)
+            tnode.idf = log10(self.dnum / tnode.df)
             self[term]['tnode'] = tnode
             for p in tnode.plist:
                 p['w'] = tnode.idf * p['tf']
@@ -83,6 +90,7 @@ class InvertedIndex(dict):
             self[term]['tnode'] = tnode
             for p in tnode.plist:
                 p['w'] = tnode.idf * p['tf']
+
 
     def update(self):
         '''Write the in-memory tnodes to file.'''
@@ -114,16 +122,17 @@ class InvertedIndex(dict):
                 self[term]['loc'] = line_num
                 line_num += 1
         linecache.clearcache()
-        
+
+
     def write(self):
         '''DEPRICATED: Use write_to_file instead.'''
-        tdict_file = open(self.tdict_path, 'w')
-        line_num = 1
-        for term in self:
-            tdict_file.write('%s\n' % self[term]['tnode'].serialize())
-            self[term]['loc'] = line_num
-            line_num += 1
-        tdict_file.close()
+        with open(self.tdict_path, 'w') as tdict_file:
+            line_num = 1
+            for term in self:
+                tdict_file.write('%s\n' % self[term]['tnode'].serialize())
+                self[term]['loc'] = line_num
+                line_num += 1
+
 
     def init_index(self):
         '''DEPRICATED: __init__ handles this now.'''
@@ -134,7 +143,6 @@ class InvertedIndex(dict):
                 term = parts[0]
                 self[term] = {'loc':line_num, 'tnode':None}
                 line_num += 1
-        #tdict_file.close()
 
 
     def get_term_data(self, term):
@@ -164,7 +172,11 @@ class InvertedIndex(dict):
         plist = segments[1:]
         for posting in plist:
             pdata = posting.split(':')
-            tnode.plist.append({'did':pdata[0],'tf':pdata[1],'w':pdata[2]})
+            tnode.plist.append({
+                'did':pdata[0],
+                'tf':int(pdata[1]),
+                'w':float(pdata[2])
+            })
 
         self[term]['tnode'] = tnode
         return tnode
@@ -179,4 +191,52 @@ class InvertedIndex(dict):
             self[term]['tnode'] = None
 
 
+    def query(self, qterms):
+        '''Initial pass a calculating similarity scores from query tokens.'''
+        terms = set(qterms)
+        docs = []
+        tdata = {}
+
+        # Remove term which are not in the index
+        mterms = set()
+        for term in terms:
+            if term in self:
+                self.get_term_data(term)
+            else:
+                mterms.add(term)
+        terms = terms - mterms
+
+        # Prep term data for building term-document matrix
+        qv = []
+        for term in terms:
+            qv.append(self[term]['tnode'].idf)
+            if term in self:
+                tdata[term] = {}
+                for p in self[term]['tnode'].plist:
+                    if p['did'] not in docs:
+                        docs.append(p['did'])
+                    tdata[term][p['did']] = p['w']
+
+        # Build term-document matrix
+        matrix = []
+        for tidx, term in enumerate(terms):
+            matrix.append([])
+            for didx, did in enumerate(docs):
+                if did in tdata[term]:
+                    matrix[tidx].append(tdata[term][did])
+                else:
+                    matrix[tidx].append(0)
+        
+        # Create numpy "matrix" for linear algebra calcs
+        matrix = numpy.array(matrix).T
+
+        # Calculate cosine similarity
+        dscores = {}
+        for didx, did in enumerate(docs):
+            dv = matrix[didx,:]
+            numerator = numpy.dot(qv, dv)
+            denominator = numpy.linalg.norm(qv) * numpy.linalg.norm(dv)
+            dscores[did] =  numerator / denominator
+        
+        return dscores
 

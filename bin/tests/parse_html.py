@@ -2,7 +2,8 @@ from tokenizer import DocProcessor
 
 dproc = DocProcessor()
 #dproc.parse('/home/ubuntu/eecs767/var/docsnew/Zion_National_Park.htm')
-dproc.parse('/home/ubuntu/eecs767/var/docs/doc1.html')
+#dproc.parse('/home/ubuntu/eecs767/var/docs/doc1.html')
+dproc.parse('http://www.ku.edu')
 for token in dproc.tokens:
     print token
 

@@ -23,7 +23,7 @@ def crawl(url):
             did = md5(url).hexdigest()
             if did not in dl:
                 pq = Queue('crawl', connection=redis_conn)
-                pq.enqueue(process, url);
+                pq.enqueue(crawl, url);
                 pq = Queue('process', connection=redis_conn)
                 pq.enqueue(process, url);
 
@@ -42,7 +42,7 @@ def process(url):
     
             redis_conn = Redis()
             wq = Queue('write', connection=redis_conn)
-            wq.enqueue(process, args=(
+            wq.enqueue(write, args=(
                 plist,
                 url
             ));
@@ -52,10 +52,7 @@ def write(plist, url):
     RQ worker function which adds the given document posting list data to the
     inverted index.
     '''
-    print len(plist)
-    print url
     dl = DocList()
-    print len(dl)
     if len(dl) < 100:
         did = md5(url).hexdigest()
 

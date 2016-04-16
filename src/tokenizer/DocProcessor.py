@@ -7,7 +7,7 @@ class DocProcessor():
 
     blacklist = [u'script']
     stopwords = ['a', 'an', 'of', 'in', 'is', 'on', 'to', 'at', 'the']
-    stopchars = ['~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '{', '[', '}', ']', '|', '\\', ':', ';', '"', '\'', '<', ',', '>', '.', '?', '/', u'\ufffd', u'\u2265', u'\u2014', u'\u2022', u'\u00ae', u'\ufeff']
+    stopchars = ['~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '{', '[', '}', ']', '|', '\\', ':', ';', '"', '\'', '<', ',', '>', '.', '?', '/', u'\ufffd', u'\u2265', u'\u2014', u'\u2022', u'\u00ae', u'\ufeff', u'\xbb']
     splitchars = ['-', '/']
 
 
@@ -63,6 +63,7 @@ class DocProcessor():
     def normalize_tokens(self):
         self.tokens = [self.normalize(token) for token in self.tokens if token not in self.stoplist]
         self.tokens = [token for token in self.tokens if token is not None]
+        self.tokens = [token.encode('UTF-8') for token in self.tokens]
 
 
     def normalize(self, token):

@@ -14,10 +14,10 @@ class InvertedIndex(dict):
         ):
         '''Initialize the index from the given term file.'''
         super(InvertedIndex, self).__init__() 
-        # TODO: Get dictionary filepath from config
         self.tdict_path = tdict_path 
         self.dlist_path = dlist_path
-        with open(self.tdict_path, 'r') as tdict_file:
+
+        with open(self.tdict_path, 'r+') as tdict_file:
             line_num = 1
             for line in tdict_file:
                 parts = line.split('|')
@@ -27,7 +27,7 @@ class InvertedIndex(dict):
 
         # Count the number of documents for calculations.
         i = -1
-        with open(self.dlist_path, 'r') as dlist_file:
+        with open(self.dlist_path, 'r+') as dlist_file:
             for i, l in enumerate(dlist_file):
                 pass
             self.dnum = i + 1
@@ -117,7 +117,7 @@ class InvertedIndex(dict):
 
     def update(self):
         '''Write the in-memory tnodes to file.'''
-        with open(self.tdict_path, 'r') as tdict_file:
+        with open(self.tdict_path, 'r+') as tdict_file:
             tdata = tdict_file.readlines()
             line_num = len(tdata) + 1
 
@@ -136,7 +136,7 @@ class InvertedIndex(dict):
                 del terms[term]
 
         # Write changes to file
-        with open(self.tdict_path, 'w') as tdict_file:
+        with open(self.tdict_path, 'w+') as tdict_file:
             # Write modified
             tdict_file.writelines(tdata)
             # Add new
@@ -148,8 +148,8 @@ class InvertedIndex(dict):
 
 
     def write(self):
-        '''DEPRICATED: Use write_to_file instead.'''
-        with open(self.tdict_path, 'w') as tdict_file:
+        '''DEPRICATED: Use append instead.'''
+        with open(self.tdict_path, 'w+') as tdict_file:
             line_num = 1
             for term in self:
                 tdict_file.write('%s\n' % self[term]['tnode'].serialize())
@@ -159,7 +159,7 @@ class InvertedIndex(dict):
 
     def init_index(self):
         '''DEPRICATED: __init__ handles this now.'''
-        with open(self.tdict_path, 'r') as tdict_file:
+        with open(self.tdict_path, 'r+') as tdict_file:
             line_num = 1
             for line in tdict_file:
                 parts = line.split('|')

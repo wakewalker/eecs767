@@ -9,4 +9,5 @@ urls = [
 ]
 
 for url in urls:
+    print '-- Processing %s' % url
     worker.process(url)

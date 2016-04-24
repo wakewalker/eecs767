@@ -1,13 +1,14 @@
 from rq import Queue
 from redis import Redis
 from hashlib import md5
+from time import sleep
 
 from crawler import WebCrawler
 from tokenizer import DocProcessor
 from indexer import DocList, InvertedIndex
 
 
-def crawl(url):
+def crawl(url, delay=1):
     '''
     RQ worker function which extracts URLs from the page contents at given the
     URL, then passes new URLs to both the CRAWL and PROCESS queues for futher
@@ -15,9 +16,11 @@ def crawl(url):
     '''
     wc = WebCrawler()
     urls = wc.crawl(url)
+
+    sleep(delay)
     
     dl = DocList()
-    if len(dl) < 100:
+    if len(dl) < 1000:
         redis_conn = Redis()
         for url in urls:
             did = md5(url).hexdigest()
@@ -33,7 +36,7 @@ def process(url):
     passes on the document posting list to the WRITE queue for futher action.
     '''
     dl = DocList()
-    if len(dl) < 100:
+    if len(dl) < 1000:
         did = md5(url).hexdigest()
         if did not in dl:
             dproc = DocProcessor()
@@ -53,7 +56,7 @@ def write(plist, url):
     inverted index.
     '''
     dl = DocList()
-    if len(dl) < 100:
+    if len(dl) < 1000:
         did = md5(url).hexdigest()
 
         if did not in dl:

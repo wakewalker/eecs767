@@ -8,13 +8,15 @@ from indexer.TermNode import TermNode
 
 class InvertedIndex(dict):
 
-    dnum = 5
-
-    def __init__(self, tdict_path='/home/ubuntu/eecs767/var/term.dct'):
+    def __init__(self,
+            tdict_path='/home/ubuntu/eecs767/var/term.dct',
+            dlist_path='/home/ubuntu/eecs767/var/doc.lst'
+        ):
         '''Initialize the index from the given term file.'''
-        super(InvertedIndex, self).__init__()
+        super(InvertedIndex, self).__init__() 
         # TODO: Get dictionary filepath from config
         self.tdict_path = tdict_path 
+        self.dlist_path = dlist_path
         with open(self.tdict_path, 'r') as tdict_file:
             line_num = 1
             for line in tdict_file:
@@ -22,6 +24,13 @@ class InvertedIndex(dict):
                 term = unicode(parts[0], 'utf-8')
                 self[term] = {'loc':line_num, 'tnode':None}
                 line_num += 1
+
+        # Count the number of documents for calculations.
+        i = -1
+        with open(self.dlist_path, 'r') as dlist_file:
+            for i, l in enumerate(dlist_file):
+                pass
+            self.dnum = i + 1
 
 
     def add_term_data(self, term, did, tf):
@@ -59,8 +68,22 @@ class InvertedIndex(dict):
     def calc_scores(self):
         '''Calculate idf and weight(w)'''
         for term in self:
+            if term in self:
+                if self[term]['tnode'] is None:
+                    tn = self.get_term_data(term)
+                tnode = self[term]['tnode']
+                tnode.idf = log10(self.dnum / tnode.df)
+                self[term]['tnode'] = tnode
+                for p in tnode.plist:
+                    p['w'] = tnode.idf * p['tf']
+        return
+
+
+    def calc_given(self, terms):
+        '''Calculate idf and weight(w)'''
+        for term in terms:
             if self[term]['tnode'] is None:
-                self.get_term_data(term)
+                tn = self.get_term_data(term)
             tnode = self[term]['tnode']
             tnode.idf = log10(self.dnum / tnode.df)
             self[term]['tnode'] = tnode
@@ -206,6 +229,9 @@ class InvertedIndex(dict):
                 mterms.add(term)
         terms = terms - mterms
 
+        # Calc scores for given terms
+        self.calc_given(terms)
+
         # Prep term data for building term-document matrix
         qv = []
         for term in terms:
@@ -216,6 +242,7 @@ class InvertedIndex(dict):
                     if p['did'] not in docs:
                         docs.append(p['did'])
                     tdata[term][p['did']] = p['w']
+
 
         # Build term-document matrix
         matrix = []
@@ -236,7 +263,10 @@ class InvertedIndex(dict):
             dv = matrix[didx,:]
             numerator = numpy.dot(qv, dv)
             denominator = numpy.linalg.norm(qv) * numpy.linalg.norm(dv)
-            dscores[did] =  numerator / denominator
+            if (denominator == 0):
+                dscores[did] = 0
+            else:
+                dscores[did] =  numerator / denominator
         
         return dscores
 

@@ -2,6 +2,7 @@ from urllib2 import urlopen
 from urlparse import urlparse
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup, Tag, Comment
 import sys
+import snowballstemmer
 
 class DocProcessor():
 
@@ -24,8 +25,19 @@ class DocProcessor():
                 html = local_file.read()
 
         self.extract_tokens(html)
-#        self.split_tokens()
+        self.process_tokens()
+
+
+    def prep_query(self, query):
+        self.tokens = query.split()
+        self.process_tokens()
+
+
+    def process_tokens(self):
+        self.split_tokens()
         self.normalize_tokens()
+        stemmer = snowballstemmer.stemmer('english')
+        self.tokens = stemmer.stemWords(self.tokens)
 
 
     def is_url(self, doc_src):
@@ -54,10 +66,14 @@ class DocProcessor():
         return tokens
 
 
-#    def split_tokens(self):
-        # Use list[i:i] = ['a', 'b', 'c']
-#        for i, token in enumerate(self.tokens):
-#            if 
+    def split_tokens(self):
+        for i, token in enumerate(self.tokens):
+            splitchars = [sc for sc in self.splitchars if sc in token]
+            if len(splitchars) > 0:
+                tokens = token.split(splitchars[0])
+                del self.tokens[i]
+                self.tokens[i:i] = tokens
+                i -= 1
 
 
     def normalize_tokens(self):

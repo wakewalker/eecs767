@@ -8,7 +8,7 @@ from tokenizer import DocProcessor
 from indexer import DocList, InvertedIndex
 
 
-def crawl(url, config):
+def crawl(url, config, skip_delay=False):
     '''
     RQ worker function which extracts URLs from the page contents at given the
     URL, then passes new URLs to both the CRAWL and PROCESS queues for futher
@@ -17,25 +17,27 @@ def crawl(url, config):
 
     DELAY = config.get('crawler', 'crawl_delay')
     MAX_DOCS = config.get('crawler', 'max_docs')
+    DOC_LIST_FILE = config.get('indexer', 'doc_list_file')
 
-    sleep(DELAY)
+    if not skip_delay:
+        sleep(float(DELAY))
 
     wc = WebCrawler()
     urls = wc.crawl(url)
     
-    dl = DocList()
+    dl = DocList(DOC_LIST_FILE)
     if len(dl) < MAX_DOCS:
         redis_conn = Redis()
         for url in urls:
             did = md5(url).hexdigest()
             if did not in dl:
-                pq = Queue('crawl', connection=redis_conn)
-                wq.enqueue(crawl, args=(
+                cq = Queue('crawl', connection=redis_conn)
+                cq.enqueue(crawl, args=(
                     url,
                     config
                 ));
                 pq = Queue('process', connection=redis_conn)
-                wq.enqueue(process, args=(
+                pq.enqueue(process, args=(
                     url,
                     config
                 ));
@@ -47,8 +49,10 @@ def process(url, config):
     passes on the document posting list to the WRITE queue for futher action.
     '''
     MAX_DOCS = config.get('crawler', 'max_docs')
+    DOC_LIST_FILE = config.get('indexer', 'doc_list_file')
     
-    dl = DocList()
+    dl = DocList(DOC_LIST_FILE)
+    print dl
     if len(dl) < MAX_DOCS:
         did = md5(url).hexdigest()
         if did not in dl:
@@ -72,9 +76,10 @@ def write(plist, url, config):
     '''
     MAX_DOCS = config.get('crawler', 'max_docs')
     TERM_DICT_FILE = config.get('indexer', 'term_dict_file')
-    DOC_LIST_FILE = config.get('indexer', 'term_dict_file')
+    DOC_LIST_FILE = config.get('indexer', 'doc_list_file')
     
-    dl = DocList()
+    dl = DocList(DOC_LIST_FILE)
+    print dl
     if len(dl) < MAX_DOCS:
         did = md5(url).hexdigest()
 

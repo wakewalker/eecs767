@@ -1,4 +1,8 @@
 from crawler import worker
+from ConfigParser import ConfigParser
+
+config = ConfigParser()
+config.read('/home/ubuntu/eecs767/etc/config/ku.ini')
 
 urls = [
     'http://www.ku.edu',
@@ -10,4 +14,4 @@ urls = [
 
 for url in urls:
     print '-- Processing %s' % url
-    worker.process(url)
+    worker.process(url, config)

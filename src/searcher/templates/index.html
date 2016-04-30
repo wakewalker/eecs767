@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Bootstrap 101 Template</title>
+    <title>Curiosity</title>
 
     <!-- Bootstrap -->
     <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -22,18 +22,65 @@
     <div class="container" style="font-family: 'Josefin Sans', sans-serif;">
         <h1 class="text-center" style="font-family: 'Josefin Sans', sans-serif; font-size:64px; padding-top:50px;">Curiosity<small style="font-size:18px;"> for Wikipedia</small></h1>
         <div class="row">
-            <form class="col-md-8 col-md-offset-2" action="/query" method="post">
+            <form class="col-md-8 col-md-offset-2" action="/" method="post">
                 <div class="row">
-                    <input type="text" class="form-control" id="query" placeholder="What are you curious about?">
+                    <input type="text" class="form-control" id="query" name="query" placeholder="What are you curious about?" value="{{ query }}" autofocus>
                     </div>
                 <div class="row" style="padding-top:25px;">
                     <div class="text-center">
-  <button type="submit" class="btn btn-default" style="padding-bottom:3px;">Explore</button>
-  <button type="submit" class="btn btn-warning" style="padding-bottom:3px;">Enhanced</button>                  
+  <button type="submit" class="btn btn-default" style="padding-bottom:3px;" name="_explore">Explore</button>
+  <button type="submit" class="btn btn-info" style="padding-bottom:3px;" name="_enhanced">Enhanced</button> 
                 </div>
                 </div>
+            </form>
+        </div>
+        {% if request is defined and False %}
+        <hr/>
+        <h3>Request</h3>
+        <div class="row">
+            <div class="col-md-12">
+                {{ request.method }}<br/>
+                {{ request.form.query }}
             </div>
         </div>
+        {% endif %}
+
+        {% if docs is defined %}
+        <hr/>
+        <h3>Relavent Docs</h3>
+        {% for doc in docs %}
+        <div class="row">
+            <div class="col-md-12">
+                <p>{{ doc }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if tokens is defined %}
+        <hr/>
+        <h3>Tokens</h3>
+        {% for token in tokens %}
+        <div class="row">
+            <div class="col-md-12">
+                <p>{{ token }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if results is defined %}
+        <hr/>
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+        {% for did, result in results.items() %}
+                <h4><a href="{{ result.url }}">{{ result.url }}</a></h4>
+                    <small class="text-info"><strong>Score:</strong> {{ result.score }}</small>
+                <p>{{ result.abstract }}</p><br/>
+        {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

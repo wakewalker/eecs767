@@ -1,3 +1,4 @@
+import timeit
 from operator import itemgetter
 from flask import Flask, render_template, request
 
@@ -12,6 +13,7 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')#, request=request)
     else:
+        start_time = timeit.default_timer()
         query = request.form['query']
 
         dproc = DocProcessor()
@@ -38,12 +40,16 @@ def index():
                 'abstract': abstract
             }
 
+        elapsed_time = timeit.default_timer() - start_time
+
         return render_template('index.html', 
             #request=request,
             #tokens=dproc.tokens,
             #docs=ranked_docs[:10],
             query=query,
-            results=results 
+            results=results,
+            elapsed_time=round(elapsed_time,3),
+            total_docs=len(dlist)
         )
 
 if __name__ == '__main__':

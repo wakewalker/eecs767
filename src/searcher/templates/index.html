@@ -73,9 +73,16 @@
         <hr/>
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
+            <div class="col-md-10 col-md-offset-1">
+                <span class="text-muted"><strong>{{ total_docs }}</strong> total Wikipedia pages searched in <strong>{{ elapsed_time }}</strong> seconds. The top <strong>ten</strong> ranked pages are listed below for your review...</span>
         {% for did, result in results.items() %}
-                <h4><a href="{{ result.url }}">{{ result.url }}</a></h4>
-                    <small class="text-info"><strong>Score:</strong> {{ result.score }}</small>
+                <h4><a href="{{ result.url }}" target="_new">{{ result.url }}</a></h4>
+                <small class="text-muted">
+                    <strong>CosSim</strong> ({{ result.score|round(3) }}) x 
+                    <strong>TermProx</strong> (0.000) = 
+                    <strong>Score</strong> (0.000)
+                </small><br/>
+                <small><a href="{{ result.url }}" target="_new">{{ result.url }}</a></small>
                 <p>{{ result.abstract }}</p><br/>
         {% endfor %}
             </div>

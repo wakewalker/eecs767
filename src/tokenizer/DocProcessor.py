@@ -106,17 +106,17 @@ class DocProcessor():
 
     def gen_posting_list(self):
         pdict = {}
-        for token in self.tokens:
+        for pos, token in enumerate(self.tokens):
             if token in pdict:
-                pdict[token] += 1
+                pdict[token].append(pos)
             else:
-                pdict[token] = 1
+                pdict[token] = [pos]
 
         plist = []
         for term in sorted(pdict):
             plist.append({
                 'term': term,
-                'tfreq': pdict[term]
+                'pdata': pdict[term]
             })
 
         return plist

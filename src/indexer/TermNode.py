@@ -11,15 +11,13 @@ class TermNode():
     def serialize(self):
         pl_str = ''
         for p in self.plist:
-            pl_str += '>%s:%s:%s' % (
+            pl_str += '>%s:%s' % (
                 p['did'],
-                p['tf'],
-                p.get('w', 0)
+                ','.join([str(i) for i in p['pos']]),
             )
-        return '%s|%s:%s:%s%s' % (
+        return '%s|%s:%s%s' % (
             self.term,
             self.tf,
             self.df,
-            self.idf,
             pl_str
         )

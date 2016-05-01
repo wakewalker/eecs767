@@ -33,14 +33,14 @@ class InvertedIndex(dict):
             self.dnum = i + 1
 
 
-    def add_term_data(self, term, did, tf):
+    def add_term_data(self, term, did, pos):
         '''Add term data to the index for the given term.'''
         if term in self:
             tnode = self[term]['tnode']
         else:
             tnode = TermNode(term)
-        tnode.plist.append({'did':did,'tf':int(tf)})
-        tnode.tf += int(tf)
+        tnode.plist.append({'did':did,'pos':pos})
+        tnode.tf += len(pos)
         tnode.df += 1
         if term in self:
             self[term]['tnode'] = tnode
@@ -61,7 +61,7 @@ class InvertedIndex(dict):
             self.add_term_data(
                 tdata['term'],
                 did,
-                tdata['tfreq']
+                tdata['pdata']
             )
 
 
@@ -75,7 +75,7 @@ class InvertedIndex(dict):
                 tnode.idf = log10(self.dnum / tnode.df)
                 self[term]['tnode'] = tnode
                 for p in tnode.plist:
-                    p['w'] = tnode.idf * p['tf']
+                    p['w'] = tnode.idf * len(p['pos'])
         return
 
 
@@ -88,7 +88,7 @@ class InvertedIndex(dict):
             tnode.idf = log10(self.dnum / tnode.df)
             self[term]['tnode'] = tnode
             for p in tnode.plist:
-                p['w'] = tnode.idf * p['tf']
+                p['w'] = tnode.idf * len(p['pos'])
 
 
     def build(self, term_list):
@@ -189,15 +189,13 @@ class InvertedIndex(dict):
         tinfo = segments[0].split(':')
         tnode.tf = int(tinfo[0])
         tnode.df = int(tinfo[1])
-        tnode.idf = float(tinfo[2])
 
         plist = segments[1:]
         for posting in plist:
             pdata = posting.split(':')
             tnode.plist.append({
                 'did':pdata[0],
-                'tf':int(pdata[1]),
-                'w':float(pdata[2])
+                'pos':[int(i) for i in pdata[1].split(',')]
             })
 
         self[term]['tnode'] = tnode

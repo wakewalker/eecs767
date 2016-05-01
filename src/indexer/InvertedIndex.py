@@ -217,7 +217,7 @@ class InvertedIndex(dict):
         docs = []
         tdata = {}
 
-        # Remove term which are not in the index
+        # Remove terms which are not in the index
         mterms = set()
         for term in terms:
             if term in self:
@@ -239,7 +239,6 @@ class InvertedIndex(dict):
                     if p['did'] not in docs:
                         docs.append(p['did'])
                     tdata[term][p['did']] = p['w']
-
 
         # Build term-document matrix
         matrix = []
@@ -267,3 +266,46 @@ class InvertedIndex(dict):
         
         return dscores
 
+
+    def calc_term_prox(self, terms):
+        docs = {}
+        for term in terms:
+            for p in self[term]['tnode'].plist:
+                if p['did'] in docs:
+                    docs[p['did']][term] = p['pos']
+                else:
+                    docs[p['did']] = {term: p['pos']}
+
+        for did, doc in docs.iteritems():
+            print '%s => %s' % (did, doc)
+
+        for did, doc_terms in docs.iteritems():
+            n = len(doc_terms)
+            if n == 1:
+                tps = 1.0
+            else:
+                windows = []
+                for term, positions in doc_terms.iteritems():
+                    windows = self.extend_windows(windows, positions)
+
+                w = 1000000
+                for window in windows:
+                    wlen = max(window)-min(window)+1
+                    if wlen < w:
+                        w = wlen
+
+                print 'log10(%s)/log10(%s)' % (n, w)
+                tps = log10(n)/log10(w)
+
+            print '%s: %s' % (did, tps)
+
+
+    def extend_windows(self, windows, positions):
+        new_windows = []
+        if not windows:
+            for position in positions:
+                new_windows.append([position])
+        for window in windows:
+            for position in positions:
+                new_windows.append(window + [position])
+        return new_windows

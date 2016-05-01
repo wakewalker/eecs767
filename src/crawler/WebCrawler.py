@@ -5,6 +5,7 @@ from BeautifulSoup import BeautifulSoup
 class WebCrawler():
 
     def crawl(self, target_url):
+        requests.packages.urllib3.disable_warnings()
         target_attrs = urlparse(target_url)
         resp = requests.get(target_url)
 

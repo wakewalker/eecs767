@@ -89,7 +89,6 @@ class InvertedIndex(dict):
             self[term]['tnode'] = tnode
             for p in tnode.plist:
                 p['w'] = tnode.idf * p['tf']
-        return
 
 
     def build(self, term_list):

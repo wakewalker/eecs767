@@ -68,7 +68,7 @@ class DocProcessor():
 
     def split_tokens(self):
         for i, token in enumerate(self.tokens):
-            splitchars = [sc for sc in self.splitchars if sc in token]
+            splitchars = [sc for sc in self.stopchars if sc in token]
             if len(splitchars) > 0:
                 tokens = token.split(splitchars[0])
                 del self.tokens[i]

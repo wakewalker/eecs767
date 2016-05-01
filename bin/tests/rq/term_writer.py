@@ -3,9 +3,9 @@ from crawler import worker
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
-config.read('/home/ubuntu/eecs767/etc/config/ku.ini')
+config.read('/home/ubuntu/eecs767/etc/config/wikipedia.ini')
 
-url = 'http://www.kumc.edu'
+url = 'https://en.wikipedia.org/wiki/Main_Page'
 dproc = DocProcessor()
 dproc.parse(url)
 plist = dproc.gen_posting_list()

@@ -267,6 +267,27 @@ class InvertedIndex(dict):
         return dscores
 
 
+    def enhanced_query(self, qterms):
+
+        cos_sims = self.query(qterms)
+        term_proxs = self.calc_term_prox(set(qterms))
+        
+        #for did, cos_sim in cos_sims.iteritems():
+            #print '%s: %s' % (did, cos_sim)
+        #print '-------'
+        #for did, term_prox in term_proxs.iteritems():
+            #print '%s: %s' % (did, term_prox)
+
+        fscores = {}
+        #print '-------'
+        for did, cos_sim in cos_sims.iteritems():
+            fscore = cos_sim * term_proxs[did]
+            fscores[did] = fscore
+            #print '%s: %s' % (did, fscore)
+
+        return fscores
+
+
     def calc_term_prox(self, terms):
         docs = {}
         for term in terms:
@@ -276,9 +297,10 @@ class InvertedIndex(dict):
                 else:
                     docs[p['did']] = {term: p['pos']}
 
-        for did, doc in docs.iteritems():
-            print '%s => %s' % (did, doc)
+        #for did, doc in docs.iteritems():
+            #print '%s => %s' % (did, doc)
 
+        scores = {}
         for did, doc_terms in docs.iteritems():
             n = len(doc_terms)
             if n == 1:
@@ -294,10 +316,13 @@ class InvertedIndex(dict):
                     if wlen < w:
                         w = wlen
 
-                print 'log10(%s)/log10(%s)' % (n, w)
+                #print 'log10(%s)/log10(%s)' % (n, w)
                 tps = log10(n)/log10(w)
 
-            print '%s: %s' % (did, tps)
+            #print '%s: %s' % (did, tps)
+            scores[did] = tps
+            
+        return scores
 
 
     def extend_windows(self, windows, positions):

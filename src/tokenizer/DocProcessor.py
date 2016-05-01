@@ -50,6 +50,8 @@ class DocProcessor():
             html,
             convertEntities=BeautifulStoneSoup.ALL_ENTITIES
         )
+        title = soup.find('title').text
+        self.title = title
         body = soup.find('body')
         tokens = self.find_tokens(body)
         self.tokens = tokens

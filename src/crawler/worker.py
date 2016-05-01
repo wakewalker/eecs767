@@ -68,11 +68,12 @@ def process(url, config):
             wq.enqueue(write, args=(
                 plist,
                 url,
+                dproc.title,
                 config
             ));
 
 
-def write(plist, url, config):
+def write(plist, url, title, config):
     '''
     RQ worker function which adds the given document posting list data to the
     inverted index.
@@ -86,7 +87,7 @@ def write(plist, url, config):
         did = md5(url).hexdigest()
 
         if did not in dl:
-            dl.append(url)
+            dl.append(url, title)
 
             iidx = InvertedIndex(
                 TERM_DICT_FILE,

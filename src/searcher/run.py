@@ -35,7 +35,8 @@ def index():
         results = {}
         for doc in ranked_docs[:10]:
             results[doc[0]] = {
-                'url': dlist[doc[0]],
+                'url': dlist[doc[0]]['url'],
+                'title': dlist[doc[0]]['title'],
                 'score': doc[1],
                 'abstract': abstract
             }

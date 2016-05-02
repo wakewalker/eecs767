@@ -1,3 +1,4 @@
+import robotparser
 from rq import Queue
 from redis import Redis
 from hashlib import md5
@@ -20,12 +21,15 @@ def crawl(url, config, skip_delay=False):
     MAX_DOCS = int(config.get('crawler', 'max_docs'))
     FRNT_LIST_FILE = config.get('crawler', 'url_frontier_file')
     TARGET_DOMAIN = config.get('crawler', 'target_domain')
+    ROBOTS_LOC = config.get('crawler', 'robots_loc')
 
     if not skip_delay:
         sleep(float(DELAY))
 
     wc = WebCrawler()
     urls = wc.crawl(url)
+    rp = robotparser.RobotParser()
+    rp.read()
     
     dl = DocList(FRNT_LIST_FILE)
     if len(dl) < MAX_DOCS:
@@ -33,7 +37,8 @@ def crawl(url, config, skip_delay=False):
         for url in urls:
             did = md5(url).hexdigest()
             domain = urlsplit(url).netloc
-            if (did not in dl) and (domain == TARGET_DOMAIN):
+            fetchable = rp.can_fetch('*', url)
+            if (did not in dl) and (domain == TARGET_DOMAIN) and fetchable:
                 dl.append(url)
                 cq = Queue('crawl', connection=redis_conn)
                 cq.enqueue(crawl, args=(
@@ -47,13 +52,17 @@ def crawl(url, config, skip_delay=False):
                 ));
 
 
-def process(url, config):
+def process(url, config, skip_delay=False):
     '''
     RQ worker function which tokenizes the page contents at the given URL, then 
     passes on the document posting list to the WRITE queue for futher action.
     '''
+    DELAY = int(config.get('crawler', 'crawl_delay'))
     MAX_DOCS = int(config.get('crawler', 'max_docs'))
     DOC_LIST_FILE = config.get('indexer', 'doc_list_file')
+
+    if not skip_delay:
+        sleep(float(DELAY))
     
     dl = DocList(DOC_LIST_FILE)
     if len(dl) < MAX_DOCS:

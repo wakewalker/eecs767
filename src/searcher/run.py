@@ -13,6 +13,8 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')#, request=request)
     else:
+        abstract = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse vitae purus sit amet magna iaculis rhoncus. Aenean ullamcorper nibh vitae lacus commodo condimentum. Aenean ornare pharetra est id porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eu ante sed arcu maximus imperdiet. Phasellus id nisl quis sem consectetur sagittis. Duis placerat nisi ut nisl condimentum ornare. Sed pulvinar arcu nisl, eu faucibus dui tincidunt aliquam. Aliquam malesuada faucibus nisl, et malesuada turpis sagittis nec. Aliquam id pretium augue.'
+
         start_time = timeit.default_timer()
         query = request.form['query']
 
@@ -20,26 +22,38 @@ def index():
         dproc.prep_query(query)
         
         iidx = InvertedIndex(
-            '/home/ubuntu/eecs767/var/ku/term.dct',
-            '/home/ubuntu/eecs767/var/ku/doc.lst'
+            '/home/ubuntu/eecs767/var/wikipedia-1000/term.dct',
+            '/home/ubuntu/eecs767/var/wikipedia-1000/doc.lst'
         )
-        rel_docs = iidx.query(dproc.tokens)
-        ranked_docs = sorted(rel_docs.items(), key=itemgetter(1), reverse=True)
 
         dlist = DocList(
-            '/home/ubuntu/eecs767/var/ku/doc.lst'
+            '/home/ubuntu/eecs767/var/wikipedia-1000/doc.lst'
         )
 
-        abstract = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse vitae purus sit amet magna iaculis rhoncus. Aenean ullamcorper nibh vitae lacus commodo condimentum. Aenean ornare pharetra est id porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eu ante sed arcu maximus imperdiet. Phasellus id nisl quis sem consectetur sagittis. Duis placerat nisi ut nisl condimentum ornare. Sed pulvinar arcu nisl, eu faucibus dui tincidunt aliquam. Aliquam malesuada faucibus nisl, et malesuada turpis sagittis nec. Aliquam id pretium augue.'
+        results = []
+        if '_enhanced' in request.form:
+            rel_docs = iidx.enhanced_query(dproc.tokens)
+            ranked_docs = sorted(rel_docs, key=itemgetter('fscore'), reverse=True)
+            for doc in ranked_docs[:10]:
+                results.append({
+                    'url': dlist[doc['did']]['url'],
+                    'title': dlist[doc['did']]['title'],
+                    'abstract': abstract,
+                    'cos_sim': doc['cos_sim'],
+                    'term_prox': doc['term_prox'],
+                    'fscore': doc['fscore']
+                })
+        else:
+            rel_docs = iidx.query(dproc.tokens)
+            ranked_docs = sorted(rel_docs.items(), key=itemgetter(1), reverse=True)
 
-        results = {}
-        for doc in ranked_docs[:10]:
-            results[doc[0]] = {
-                'url': dlist[doc[0]]['url'],
-                'title': dlist[doc[0]]['title'],
-                'score': doc[1],
-                'abstract': abstract
-            }
+            for doc in ranked_docs[:10]:
+                results.append({
+                    'url': dlist[doc[0]]['url'],
+                    'title': dlist[doc[0]]['title'],
+                    'score': doc[1],
+                    'abstract': abstract
+                })
 
         elapsed_time = timeit.default_timer() - start_time
 

@@ -278,14 +278,19 @@ class InvertedIndex(dict):
         #for did, term_prox in term_proxs.iteritems():
             #print '%s: %s' % (did, term_prox)
 
-        fscores = {}
+        scores = []
         #print '-------'
         for did, cos_sim in cos_sims.iteritems():
             fscore = cos_sim * term_proxs[did]
-            fscores[did] = fscore
+            scores.append({
+                'did': did,
+                'cos_sim': cos_sim,
+                'term_prox': term_proxs[did],
+                'fscore': fscore
+            })
             #print '%s: %s' % (did, fscore)
 
-        return fscores
+        return scores
 
 
     def calc_term_prox(self, terms):

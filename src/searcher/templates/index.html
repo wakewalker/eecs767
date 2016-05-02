@@ -40,7 +40,13 @@
         <div class="row">
             <div class="col-md-12">
                 {{ request.method }}<br/>
-                {{ request.form.query }}
+                {{ request.form.query }}<br/>
+                {% if request.form._explore is defined %}
+                     EXPLORE 
+                {% endif %}
+                {% if request.form._enhanced is defined %}
+                     ENHANCED 
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -73,14 +79,24 @@
         <hr/>
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
-            <div class="col-md-10 col-md-offset-1">
+                {% if request.form._explore is defined %}
+                    <h3>Results</h3> 
+                {% endif %}
+                {% if request.form._enhanced is defined %}
+                    <h3>Enhanced Results</h3>  
+                {% endif %}
                 <span class="text-muted"><strong>{{ total_docs }}</strong> total Wikipedia pages searched in <strong>{{ elapsed_time }}</strong> seconds. The top <strong>ten</strong> ranked pages are listed below for your review...</span>
-        {% for did, result in results.items() %}
-                <h4><a href="{{ result.url }}" target="_new">{{ result.url }}</a></h4>
+        {% for result in results %}
+                <h4><a href="{{ result.url }}" target="_new">{{ result.title }}</a></h4>
                 <small class="text-muted">
-                    <strong>CosSim</strong> ({{ result.score|round(3) }}) x 
-                    <strong>TermProx</strong> (0.000) = 
-                    <strong>Score</strong> (0.000)
+                    {% if request.form._explore is defined %}
+                    <strong>CosSim</strong> ({{ result.score|round(3) }})
+                    {% endif %}
+                    {% if request.form._enhanced is defined %}
+                    <strong>CosSim</strong> ({{ result.cos_sim|round(3) }}) x 
+                    <strong>TermProx</strong> ({{ result.term_prox|round(3)}}) = 
+                    <strong>Score</strong> ({{ result.fscore|round(3)}})
+                    {% endif %}
                 </small><br/>
                 <small><a href="{{ result.url }}" target="_new">{{ result.url }}</a></small>
                 <p>{{ result.abstract }}</p><br/>

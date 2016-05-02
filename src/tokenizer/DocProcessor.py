@@ -80,6 +80,7 @@ class DocProcessor():
 
     def normalize_tokens(self):
         self.tokens = [self.normalize(token) for token in self.tokens if token not in self.stoplist]
+        self.tokens = [token for token in self.tokens if token != '']
         self.tokens = [token for token in self.tokens if token is not None]
         self.tokens = [token.encode('UTF-8') for token in self.tokens]
 
@@ -90,20 +91,25 @@ class DocProcessor():
         return token
 
     
-    def char_strip(self, otoken):
+    def char_strip(self, token):
         '''Strip leading and trailing stopchars recusively'''
-        token = otoken
-        if len(token) > 0 and token[0] in self.stopchars:
-            token = token[1:]
-        if len(token) > 0 and token[-1] in self.stopchars:
-            token = token[:-1]
+        for stopchar in self.stopchars:
+            token = token.replace(stopchar, '')
+
+        return token
+
+        #token = otoken
+        #if len(token) > 0 and token[0] in self.stopchars:
+        #    token = token[1:]
+        #if len(token) > 0 and token[-1] in self.stopchars:
+        #    token = token[:-1]
         
-        if token == '':
-            return None
-        elif token == otoken:
-            return token
-        else:
-            return self.char_strip(token)
+        #if token == '':
+        #    return None
+        #elif token == otoken:
+        #    return token
+        #else:
+        #    return self.char_strip(token)
 
 
     def gen_posting_list(self):

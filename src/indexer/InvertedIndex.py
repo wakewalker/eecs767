@@ -281,11 +281,13 @@ class InvertedIndex(dict):
         scores = []
         #print '-------'
         for did, cos_sim in cos_sims.iteritems():
-            fscore = cos_sim * term_proxs[did]
+            term_prox, i_win_loc = term_proxs[did]
+            fscore = cos_sim * term_prox
             scores.append({
                 'did': did,
                 'cos_sim': cos_sim,
-                'term_prox': term_proxs[did],
+                'term_prox': term_prox,
+                'i_win_loc': i_win_loc,
                 'fscore': fscore
             })
             #print '%s: %s' % (did, fscore)
@@ -295,15 +297,13 @@ class InvertedIndex(dict):
 
     def calc_term_prox(self, terms):
         docs = {}
+        t = len(terms)
         for term in terms:
             for p in self[term]['tnode'].plist:
                 if p['did'] in docs:
                     docs[p['did']][term] = p['pos']
                 else:
                     docs[p['did']] = {term: p['pos']}
-
-        #for did, doc in docs.iteritems():
-            #print '%s => %s' % (did, doc)
 
         scores = {}
         for did, doc_terms in docs.iteritems():
@@ -316,16 +316,17 @@ class InvertedIndex(dict):
                     windows = self.extend_windows(windows, positions)
 
                 w = 1000000
+                win_loc = 100000
                 for window in windows:
                     wlen = max(window)-min(window)+1
                     if wlen < w:
+                        win_loc = min(window)+1
                         w = wlen
 
-                #print 'log10(%s)/log10(%s)' % (n, w)
-                tps = log10(n)/log10(w)
+                mod = (n/t) * (n/t)
+                tps = log10(n)/log10(w) * mod
 
-            #print '%s: %s' % (did, tps)
-            scores[did] = tps
+            scores[did] = (tps, (float(1)/win_loc))
             
         return scores
 

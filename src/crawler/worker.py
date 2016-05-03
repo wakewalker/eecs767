@@ -28,7 +28,7 @@ def crawl(url, config, skip_delay=False):
 
     wc = WebCrawler()
     urls = wc.crawl(url)
-    rp = robotparser.RobotParser()
+    rp = robotparser.RobotFileParser(ROBOTS_LOC)
     rp.read()
     
     dl = DocList(FRNT_LIST_FILE)
@@ -37,7 +37,10 @@ def crawl(url, config, skip_delay=False):
         for url in urls:
             did = md5(url).hexdigest()
             domain = urlsplit(url).netloc
-            fetchable = rp.can_fetch('*', url)
+            try:
+                fetchable = rp.can_fetch('*', url)
+            except KeyError:
+                fetchable = False
             if (did not in dl) and (domain == TARGET_DOMAIN) and fetchable:
                 dl.append(url)
                 cq = Queue('crawl', connection=redis_conn)

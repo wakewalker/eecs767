@@ -93,9 +93,9 @@
                     <strong>CosSim</strong> ({{ result.score|round(3) }})
                     {% endif %}
                     {% if request.form._enhanced is defined %}
-                    <strong>CosSim</strong> ({{ result.cos_sim|round(3) }}) x 
-                    <strong>TermProx</strong> ({{ result.term_prox|round(3)}}) = 
-                    <strong>Score</strong> ({{ result.fscore|round(3)}})
+                    <strong>CosSim</strong> ({{ result.cos_sim|round(3) }}) - 
+                    <strong>TermProx</strong> ({{ result.term_prox|round(3)}}) -
+                    <strong>WinLoc</strong> ({{ result.win_loc}})
                     {% endif %}
                 </small><br/>
                 <small><a href="{{ result.url }}" target="_new">{{ result.url }}</a></small>

@@ -22,18 +22,20 @@ def index():
         dproc.prep_query(query)
         
         iidx = InvertedIndex(
-            '/home/ubuntu/eecs767/var/wikipedia-1000/term.dct',
-            '/home/ubuntu/eecs767/var/wikipedia-1000/doc.lst'
+            '/home/ubuntu/eecs767/var/wikipedia/term.dct',
+            '/home/ubuntu/eecs767/var/wikipedia/doc.lst'
         )
 
         dlist = DocList(
-            '/home/ubuntu/eecs767/var/wikipedia-1000/doc.lst'
+            '/home/ubuntu/eecs767/var/wikipedia/doc.lst'
         )
 
         results = []
         if '_enhanced' in request.form:
             rel_docs = iidx.enhanced_query(dproc.tokens)
-            ranked_docs = sorted(rel_docs, key=itemgetter('fscore'), reverse=True)
+            #ranked_docs = sorted(rel_docs, key=itemgetter('fscore'), reverse=True)
+#            cos_ranked_docs = sorted(rel_docs, key=itemgetter('cos_sim'), reverse=True)
+            ranked_docs = sorted(rel_docs, key=itemgetter('cos_sim', 'term_prox','i_win_loc'), reverse=True)
             for doc in ranked_docs[:10]:
                 results.append({
                     'url': dlist[doc['did']]['url'],
@@ -41,6 +43,7 @@ def index():
                     'abstract': abstract,
                     'cos_sim': doc['cos_sim'],
                     'term_prox': doc['term_prox'],
+                    'win_loc': round(1/doc['i_win_loc']),
                     'fscore': doc['fscore']
                 })
         else:

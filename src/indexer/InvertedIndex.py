@@ -296,6 +296,16 @@ class InvertedIndex(dict):
 
 
     def calc_term_prox(self, terms):
+
+        # Remove terms which are not in the index
+        mterms = set()
+        for term in terms:
+            if term in self:
+                self.get_term_data(term)
+            else:
+                mterms.add(term)
+        terms = terms - mterms
+
         docs = {}
         t = len(terms)
         for term in terms:
@@ -310,6 +320,8 @@ class InvertedIndex(dict):
             n = len(doc_terms)
             if n == 1:
                 tps = 1.0
+                for term, positions in doc_terms.iteritems():
+                    win_loc = min(positions) + 1
             else:
                 windows = []
                 for term, positions in doc_terms.iteritems():

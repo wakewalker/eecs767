@@ -99,7 +99,7 @@
                     {% endif %}
                 </small><br/>
                 <small><a href="{{ result.url }}" target="_new">{{ result.url }}</a></small>
-                <p>{{ result.abstract }}</p><br/>
+                <p>{{ result.abstract|safe }}</p><br/>
         {% endfor %}
             </div>
         </div>

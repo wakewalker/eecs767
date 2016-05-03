@@ -13,7 +13,7 @@ def index():
     if request.method == 'GET':
         return render_template('index.html')#, request=request)
     else:
-        abstract = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse vitae purus sit amet magna iaculis rhoncus. Aenean ullamcorper nibh vitae lacus commodo condimentum. Aenean ornare pharetra est id porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eu ante sed arcu maximus imperdiet. Phasellus id nisl quis sem consectetur sagittis. Duis placerat nisi ut nisl condimentum ornare. Sed pulvinar arcu nisl, eu faucibus dui tincidunt aliquam. Aliquam malesuada faucibus nisl, et malesuada turpis sagittis nec. Aliquam id pretium augue.'
+        abstract = '<strong>Lorem ipsum</strong> dolor sit amet, consectetur adipiscing elit. Suspendisse vitae purus sit amet magna iaculis rhoncus. Aenean ullamcorper nibh vitae lacus commodo condimentum. Aenean ornare pharetra est id porttitor. <strong>Lorem ipsum</strong> dolor sit amet, consectetur adipiscing elit. Morbi eu ante sed arcu maximus imperdiet. Phasellus id nisl quis sem consectetur sagittis. Duis placerat nisi ut nisl condimentum ornare. Sed pulvinar arcu nisl, eu faucibus dui tincidunt aliquam. Aliquam malesuada faucibus nisl, et malesuada turpis sagittis nec. Aliquam id pretium augue.'
 
         start_time = timeit.default_timer()
         query = request.form['query']
@@ -22,12 +22,12 @@ def index():
         dproc.prep_query(query)
         
         iidx = InvertedIndex(
-            '/home/ubuntu/eecs767/var/wikipedia/term.dct',
-            '/home/ubuntu/eecs767/var/wikipedia/doc.lst'
+            '/home/ubuntu/eecs767/var/wikipedia-3833/term.dct',
+            '/home/ubuntu/eecs767/var/wikipedia-3833/doc.lst'
         )
 
         dlist = DocList(
-            '/home/ubuntu/eecs767/var/wikipedia/doc.lst'
+            '/home/ubuntu/eecs767/var/wikipedia-3833/doc.lst'
         )
 
         results = []
@@ -43,7 +43,7 @@ def index():
                     'abstract': abstract,
                     'cos_sim': doc['cos_sim'],
                     'term_prox': doc['term_prox'],
-                    'win_loc': round(1/doc['i_win_loc']),
+                    'win_loc': int(round(1/doc['i_win_loc'])),
                     'fscore': doc['fscore']
                 })
         else:
